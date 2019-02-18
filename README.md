@@ -1,1 +1,1 @@
-# We are the Triwizard Tournament Co-Champions!
+# We are the Triwizard Tournament Co-champions!
