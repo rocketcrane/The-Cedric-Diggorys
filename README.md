@@ -1,1 +1,1 @@
-# We are the Cedric Diggorys
+# We are the Triwizard Tournament Co-Champions!
