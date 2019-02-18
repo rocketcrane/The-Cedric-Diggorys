@@ -1,0 +1,10 @@
+Week 3: 2/11/19-2/17/19
+
+This week I focused on looking up some research on the senors we have avaliable to us. In particular was researching
+the limitations that the sensors each had.
+	-Brighter surfaces are easier for the infrared to detect since it can't detect dark surfaces very well
+	-Ultrasonics aren't as good as infrared at defining edges
+The rest of the team feel very condient in being able to use the senors.
+I was also researching potential drive trains for the robot. So far I really like the use of mecanum for the robot.
+Beginning to model our ideas. So far have just drawn them on paper. 
+Hope to have some parts of the robot made next week.
