@@ -6,4 +6,5 @@ First 3 weeks:
 
 Feb 18, 2019
   Soldered pins to sonar sensor, hooked sensors and motors up to arduino, soldered wires to motor. Tested different types of motors. Discussed with other people in our group about the drivetrain, chassis, ball-pick-up and ball-shooting mechanisms. Asked Carl (with other members) about our design ideas, were told to meet him tomorrow. Did research on wiring/using Arduino motor shield.
+  Also researched about mecanum/omni wheels and the possibility of using a roomba extractor brush as a part of our ball-pick-up mechanism. Turns out omni wheels can be arranged in an x-drive or a triangle-drive allowing for full mobility, including strafing to both sides.
 
