@@ -8,3 +8,6 @@ Feb 18, 2019
   Soldered pins to sonar sensor, hooked sensors and motors up to arduino, soldered wires to motor. Tested different types of motors. Discussed with other people in our group about the drivetrain, chassis, ball-pick-up and ball-shooting mechanisms. Asked Carl (with other members) about our design ideas, were told to meet him tomorrow. Did research on wiring/using Arduino motor shield.
   Also researched about mecanum/omni wheels and the possibility of using a roomba extractor brush as a part of our ball-pick-up mechanism. Turns out omni wheels can be arranged in an x-drive or a triangle-drive allowing for full mobility, including strafing to both sides. Put this in our (google doc) team notes.
 
+Feb 22, 2019
+  Discussed finishing milestones, robot's physical design etc. Worked with Ben to build a LEGO prototype robot capable of moving forward. Searched online for wheels that we could use for our robot and settled on two possible wheels types. Took notes. Researched LIDAR and a real SLAM LIDAR that might help our robot a lot. Discussed if it would be worth it to buy such a LIDAR, and we came to the conslusion that if we still had most of our budget by spring break, then we would get it. Talked about using rubber bands in our cylinder, and decided to get rubber bands and prototype our design next time.
+  
