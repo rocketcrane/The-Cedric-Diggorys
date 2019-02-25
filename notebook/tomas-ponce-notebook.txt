@@ -8,3 +8,11 @@ The rest of the team feel very condient in being able to use the senors.
 I was also researching potential drive trains for the robot. So far I really like the use of mecanum for the robot.
 Beginning to model our ideas. So far have just drawn them on paper. 
 Hope to have some parts of the robot made next week.
+
+Week 4: 2/18/19-2/24/19
+
+This week I was focused only on modeling the parts of our robot. We have made the decision to design/model the final 
+parts of our robot as we construct our prototype. The parts I managed to complete were the plow and the two seperate 
+models that will be used to hold our camera. The plow will go in front of our robot as it drives fowards and picks up 
+balls along the way. The two parts that will hold the camera are to be printed seperately and then assemble together 
+for the camera. The actual body and the base that will hold the wheels are to be made next.  
