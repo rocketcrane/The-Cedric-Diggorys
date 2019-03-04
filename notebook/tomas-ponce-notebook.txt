@@ -17,6 +17,4 @@ models that will be used to hold our camera. The plow will go in front of our ro
 balls along the way. The two parts that will hold the camera are to be printed seperately and then assemble together 
 for the camera. The actual body and the base that will hold the wheels are to be made next.  
 
-Week 5: 2/25/19-3/4/19 
 
-This week I finally managed to get one of the parts printed. After a while of trying to get the fie to work with one of the printers, the front part of the camera holder was made. The print was not ideal. One lesson learned from the print was to increase the scale of the part. Due to several factors concerning the printer and how the plastic dried, the print was just a little too tight to fit neatly around the camera. The holes that went around the part also did not come out as desired. The pegs that were originally a part of the design also were a problem. They were changed to holes so a bolt and nut could hold the two halves together. The back half of the camera was also changed due to this revelation. Work on the chasis model and other features are underway.
