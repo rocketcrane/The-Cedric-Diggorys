@@ -11,3 +11,6 @@ Feb 18, 2019
 Feb 22, 2019
   Discussed finishing milestones, robot's physical design etc. Worked with Ben to build a LEGO prototype robot capable of moving forward. Searched online for wheels that we could use for our robot and settled on two possible wheels types. Took notes. Researched LIDAR and a real SLAM LIDAR that might help our robot a lot. Discussed if it would be worth it to buy such a LIDAR, and we came to the conslusion that if we still had most of our budget by spring break, then we would get it. Talked about using rubber bands in our cylinder, and decided to get rubber bands and prototype our design next time.
   
+Feb 24 - Apr 4, 2019
+  Built an iteration of the chassis design on foam core board, did all the electronics work, designed and prototyped a quaffle-collection mechanism, built two prototypes of the mechanism (one from Legos, one from foam core board). Researched and bought a LIDAR unit during spring break. Worked with Carl to start build a proper chassis from Arcrylic.
+  
