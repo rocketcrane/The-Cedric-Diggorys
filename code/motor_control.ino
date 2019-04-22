@@ -89,3 +89,10 @@ void turn_right(){
     delay(300);
     forward(FORWARD_SPEED);
 }
+void turn_left(){
+  reverse(REVERSE_SPEED);
+    delay(750);
+    left(TURNING_SPEED);
+    delay(300);
+    forward(FORWARD_SPEED);
+}

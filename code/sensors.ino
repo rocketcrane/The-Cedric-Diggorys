@@ -8,7 +8,7 @@ int updateSensors() {
     Serial.println(sensors[i].value);
   }
 }*/
-
+//from HSV source -------------------
 // h = [0,360], s = [0,1], v = [0,1]
 //    if s == 0, then h = -1 (undefined)
 void RGBtoHSV( float r, float g, float b, float *h, float *s, float *v )
@@ -46,7 +46,7 @@ void RGBtoHSV( float r, float g, float b, float *h, float *s, float *v )
 
 }
 
-
+//end HSV source--------------------------
 
 float MIN(float a, float b, float c){
   float currMin = a;
