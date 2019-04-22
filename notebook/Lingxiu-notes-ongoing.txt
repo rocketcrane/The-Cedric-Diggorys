@@ -5,7 +5,7 @@ First 3 weeks:
   forked TEAM-YELLOW, created the-Cedric-Diggorys
 
 Feb 18, 2019
-  Soldered pins to sonar sensor, hooked sensors and motors up to arduino, soldered wires to motor. Tested different types of motors. Discussed with other people in our group about the drivetrain, chassis, ball-pick-up and ball-shooting mechanisms. Asked Carl (with other members) about our design ideas, were told to meet him tomorrow. Did research on wiring/using Arduino motor shield.
+  Soldered pins to sonar sensor, hooked sensors and motors up to arduino, soldered wires to motor. Tested different types of motors. Discussed with other people in our group about the drivetrain, chassis, ball-pick-up and ball-shooting mechanisms. Asked Carl (with other members) about our design ideas, was told to meet him tomorrow. Did research on wiring/using Arduino motor shield.
   Also researched about mecanum/omni wheels and the possibility of using a roomba extractor brush as a part of our ball-pick-up mechanism. Turns out omni wheels can be arranged in an x-drive or a triangle-drive allowing for full mobility, including strafing to both sides. Put this in our (google doc) team notes.
 
 Feb 22, 2019
@@ -14,3 +14,7 @@ Feb 22, 2019
 Feb 24 - Apr 4, 2019
   Built an iteration of the chassis design on foam core board, did all the electronics work, designed and prototyped a quaffle-collection mechanism, built two prototypes of the mechanism (one from Legos, one from foam core board). Researched and bought a LIDAR unit during spring break. Worked with Carl to start build a proper chassis from Arcrylic.
   
+Apr 4 - Apr 21
+  Designed and built the third (and definitely last) iteration of the chassis + all hardware. I designed + prototyped all arcylic parts, which were built by Cart at the machine shop. All 3D-printed parts, except the camera mount, were designed and printed by myself. I  wired and installed all the electronics. I put together nearly all robot hardware, which is currently (at 4/21) 95% finished, and I plan to move on to support Ben with the software effort. What's left of the hardware work is installing the light sensors with polarized filters, and installing a few more IR sensors.
+   I have been in the lab at least two extra days each week for the last three weeks working primarily on the robot hardware. Setting up and debugging the 3D printer took about three days, and I finally realized that the filament was the main culprit in causing all prints to warp badly. So I replaced the filament, and the printer didn't give me any issues after that. The next few days were spent coordinating with Carl to build the plow and servo mounts, printing and installing multiple parts including caster wheel mounts and ultrasonic sensor mounts, and wiring sensors. Then I mounted the Pixycam by modifying Tomas's 3D printed mount and mounting it to standoffs on the chassis. Then more parts were mounted, blah blah blah, dramatic music and montage of power tools and 3D printing, and the hardware side of things is almost completely finished.
+
