@@ -36,7 +36,7 @@ int const TURNING_SPEED = 180;
 int const REVERSE_SPEED = 170;
 
 
-int const END_TIME = 20000;
+double const END_TIME = 120000;
 
 //-------------SERVO DECLARATIONS------------------------
 Servo leftServo;
@@ -74,6 +74,7 @@ int const ALLOWABLE_BUF = 100;
 //COLOR SIGNATURES
 int const GREEN_SIG = 2;
 int const YELLOW_SIG = 1;
+int const LIGHT_SIG = 4;
 
 //State variables
 int quaffleDetectedRight;
@@ -82,16 +83,31 @@ int quaffleDetected;
 int quaffleSeenThisLoop;
 int quaffleX;
 int quaffleY;
+int loopsSinceQuaffleSeen = 1000;
+int turnCounter = 0;
 
+int collectingMode = 0;
+int scoringMode = 0;
+int followCenterLine = 1;
+int followWall = 0;
+
+int goalDetected = 0;
+int goalX;
+int goalY;
+int goalSeenThisLoop = 0;
+int goalCentered = 0;
+int goalDetectedLeft;
+int goalDetectedRight;
 
 //color sensors
-Adafruit_TCS34725softi2c leftRGB = Adafruit_TCS34725softi2c(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_4X, SDApin1, SCLpin1);
-Adafruit_TCS34725softi2c rightRGB = Adafruit_TCS34725softi2c(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_4X, SDApin2, SCLpin2);
+Adafruit_TCS34725softi2c rightRGB = Adafruit_TCS34725softi2c(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_4X, SDApin1, SCLpin1);
+Adafruit_TCS34725softi2c leftRGB = Adafruit_TCS34725softi2c(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_4X, SDApin2, SCLpin2);
 Adafruit_TCS34725softi2c rearRGB = Adafruit_TCS34725softi2c(TCS34725_INTEGRATIONTIME_2_4MS, TCS34725_GAIN_4X, SDApin3, SCLpin3);
 
 
 void setup() {
-  delay(500);
+  Serial.println("Starting");
+  delay(2000);
   pinMode(LEFT_FRONT_IR_PIN, INPUT);
   pinMode(RIGHT_FRONT_IR_PIN, INPUT);
   pinMode(LEFT_REAR_IR_PIN, INPUT);
@@ -123,12 +139,12 @@ void setup() {
   pinMode(greenpin, OUTPUT);
   pinMode(bluepin, OUTPUT);
 #endif
-  forward(FORWARD_SPEED);
+  //forward(FORWARD_SPEED);
   quaffleDetectedRight = 0;
   quaffleDetectedLeft = 0;
 
-  
-  //initializeServos();
+
+  initializeServos();
   rollIn();
 
 }
@@ -138,12 +154,24 @@ void loop() {
   float leftHue, rightHue, s, v;
 
 
-  while (millis() < END_TIME) {
-    //stop roll when no quaffle
-    if(!quaffleDetected) stopRoll();
 
-  if(!quaffleSeenThisLoop) stopRoll();
-    
+  while (millis() < END_TIME) {
+    /*
+        delay(200);
+        float leftVal = getIrVal(LEFT_FRONT_IR_PIN);
+        float rightVal = getIrVal(RIGHT_FRONT_IR_PIN);
+        Serial.print(leftVal);
+        Serial.print("  ");
+        Serial.println(rightVal);
+    */
+    //Serial.println(millis());
+
+    if (!quaffleSeenThisLoop) loopsSinceQuaffleSeen++;
+    if (loopsSinceQuaffleSeen > 500) {
+      stopRoll();
+
+    }
+
     leftRGB.setInterrupt(false);
     rightRGB.setInterrupt(false);
 
@@ -161,7 +189,7 @@ void loop() {
     //end pixy source-----------------
 
 
-    //from HSV source -----------------
+    //from HSV source ----------------
     leftRGB.getRawData(&red, &green, &blue, &clear);
     RGBtoHSV(red, green, blue, &leftHue, &s, &v);
     rightRGB.getRawData(&red, &green, &blue, &clear);
@@ -170,75 +198,173 @@ void loop() {
     //end HSV source ------------------
     //Serial.println(getVoltage());
 
-    if (leftHue < 90 && leftHue > 50) {
-      Serial.println("yellow detected left");
-      turn_right();
-    }
-    if (rightHue < 90 && rightHue > 50) {
-      Serial.println("yellow detected right");
-      turn_left();
-    }
-    
-      if(getIrVal(LEFT_FRONT_IR_PIN)<6){
+    /*
+        if (leftHue < 87 && leftHue > 77) {
+          Serial.println("yellow detected left");
+          reverse_right();
+          turnCounter++;
+        }
+        if (rightHue < 90 && rightHue > 80) {
+          Serial.println("yellow detected right");
+          reverse_left();
+          turnCounter++;
+        }
+    */
+    /*
+      if(getIrVal(LEFT_FRONT_IR_PIN)<8){
       Serial.println("Ir front right");
       reverse_left();
+      turnCounter++;
       }
 
-      if(getIrVal(RIGHT_FRONT_IR_PIN)<6){
+      if(getIrVal(RIGHT_FRONT_IR_PIN)<8){
       Serial.println("Ir front left");
       reverse_right();
+      turnCounter++;
       }
 
-      if(getIrVal(RIGHT_IR_PIN)<6){
+      if(getIrVal(RIGHT_IR_PIN)<3){
       Serial.println("Ir right");
       turn_left();
       }
-       if(getIrVal(LEFT_IR_PIN)<6){
+       if(getIrVal(LEFT_IR_PIN)<3){
       Serial.println("Ir left");
       turn_right();
       }
-      /*
+    */
+    /*
 
       if(getSonarVal(SONAR_PIN) < 0){
-        Serial.println("sonar pin");
+      Serial.println("sonar pin");
       }
 
       //rear sensors
-       if(getIrVal(RIGHT_REAR_IR_PIN)<6){
+      if(getIrVal(RIGHT_REAR_IR_PIN)<6){
       Serial.println("Ir rear right");
       }
       if(getIrVal(LEFT_REAR_IR_PIN)<6){
       Serial.println("Ir rear left");
       }
-      */
+    */
+    while (followCenterLine) {
+      Serial.println("following line");
+      leftRGB.getRawData(&red, &green, &blue, &clear);
+      RGBtoHSV(red, green, blue, &leftHue, &s, &v);
+      // Serial.println(leftHue);
+      int noAction = 1;
 
-      if(analogRead(VOLT_PIN)<LOW_BATTERY_LEVEL){
-        Serial.println("LOW BATTERY");
+      if (353 < leftHue && leftHue < 363 && noAction) {
+        Serial.println("red");
+        forward(FORWARD_SPEED);
+        noAction = 0;
+      }
+      if (192 < leftHue && leftHue < 202 && noAction) {
+        Serial.println("blue");
+        left(TURNING_SPEED);
+        noAction = 0;
+      }
+      if (150 < leftHue && leftHue < 165 && noAction) {
+        Serial.println("gray");
+        right(TURNING_SPEED);
+        noAction = 0;
+      }
+      if (getIrVal(LEFT_FRONT_IR_PIN) < 9) {
+        Serial.println("Wall detected");
+        followCenterLine = 0;
+        followWall = 1;
+        brake();
+        Serial.print(getIrVal(LEFT_FRONT_IR_PIN));
+        Serial.print(" ");
+        Serial.println(getIrVal(RIGHT_FRONT_IR_PIN));
+        Serial.println(abs(getIrVal(LEFT_FRONT_IR_PIN) - getIrVal(RIGHT_FRONT_IR_PIN)));
+
+        lineUpWall();
+
+
+        Serial.print(getIrVal(LEFT_FRONT_IR_PIN));
+        Serial.print(" ");
+        Serial.println(getIrVal(RIGHT_FRONT_IR_PIN));
+        while (getIrVal(LEFT_FRONT_IR_PIN) < 40 || getIrVal(RIGHT_FRONT_IR_PIN) < 40) {
+          right(TURNING_SPEED);
+        }
+
+      }
+
+    }
+
+    while (followWall) {
+      leftRGB.getRawData(&red, &green, &blue, &clear);
+      RGBtoHSV(red, green, blue, &leftHue, &s, &v);
+      float wallDist = getIrVal(LEFT_IR_PIN);
+      Serial.println(wallDist);
+      ///bool yellow = leftHue<87 && leftHue>77;
+      if (wallDist < 8) {
+        Serial.println("too close to wall");
+        forwardRight(FORWARD_SPEED);
       }
       
+      /*
+      if(leftHue<87 && leftHue>77){
+        Serial.println("yellow tape");
+        forwardRight(FORWARD_SPEED);
+      }*/
+      else {
+        if (wallDist > 9) {
+          forwardLeft(FORWARD_SPEED);
+        }
+        else {
+          forward(FORWARD_SPEED);
+        }
+      }
+      if (getIrVal(RIGHT_FRONT_IR_PIN) < 9) {
+        Serial.println("found goal");
+        Serial.println(wallDist);
+        Serial.println(getIrVal(LEFT_FRONT_IR_PIN));
+        Serial.println(getIrVal(RIGHT_FRONT_IR_PIN));
+        followWall = 0;
+        lineUpWall();
+        raiseArm();
+        forward(FORWARD_SPEED);
+        delay(600);
+        brake();
+        rollOut();
+        delay(1000);
+        reverse(FORWARD_SPEED);
+        delay(500);
+        brake();
+        lowerArm();
+      }
+    }
 
-      if(getLightVal(LEFT_LIGHT_PIN)>300){
-        float x = 0;
-        const int q = 100;
-        for(int i=0; i<q;i++){
-          x+= getLightVal(LEFT_LIGHT_PIN);
-        }
-        x = x/q;
-        Serial.print("Light left ");
-        Serial.println(x);
-        delay(400);
+
+
+    if (analogRead(VOLT_PIN) < LOW_BATTERY_LEVEL) {
+      Serial.println("LOW BATTERY");
+    }
+
+
+    if (getLightVal(LEFT_LIGHT_PIN) > 300) {
+      float x = 0;
+      const int q = 100;
+      for (int i = 0; i < q; i++) {
+        x += getLightVal(LEFT_LIGHT_PIN);
       }
-      if(getLightVal(RIGHT_LIGHT_PIN)>300){
-        float x = 0;
-        const int q = 100;
-        for(int i=0; i<q;i++){
-          x+= getLightVal(RIGHT_LIGHT_PIN);
-        }
-        x = x/q;
-        Serial.print("Light right ");
-        Serial.println(x);
-        delay(400);
+      x = x / q;
+      Serial.print("Light left ");
+      Serial.println(x);
+      delay(400);
+    }
+    if (getLightVal(RIGHT_LIGHT_PIN) > 300) {
+      float x = 0;
+      const int q = 100;
+      for (int i = 0; i < q; i++) {
+        x += getLightVal(RIGHT_LIGHT_PIN);
       }
+      x = x / q;
+      Serial.print("Light right ");
+      Serial.println(x);
+      delay(400);
+    }
     //from pixy source ----------------
     if (blocks)
     {
@@ -246,7 +372,7 @@ void loop() {
 
       // do this (print) every 50 frames because printing every
       // frame would bog down the Arduino
-      if (i % 5 == 0)
+      if (i % 1 == 0)
       {
         sprintf(buf, "Detected %d:\n", blocks);
         //Serial.print(buf);
@@ -258,8 +384,9 @@ void loop() {
             Serial.print(buf);
             pixy.blocks[j].print();*/
 
-          if (pixy.blocks[j].signature == GREEN_SIG) {
+          if (pixy.blocks[j].signature == GREEN_SIG && collectingMode) {
             rollIn();
+            loopsSinceQuaffleSeen = 0;
 
             if (!quaffleDetected) {
               Serial.print("Green ball ");
@@ -301,32 +428,95 @@ void loop() {
 
 
           }
-          if (pixy.blocks[j].signature == YELLOW_SIG) {
+          if (pixy.blocks[j].signature == LIGHT_SIG && pixy.blocks[j].width * pixy.blocks[j].height > 50 && scoringMode
+              && pixy.blocks[j].height < 160) {
+            goalDetected = 1;
+            goalSeenThisLoop = 1;
+            goalX = pixy.blocks[j].x;
+            goalY = pixy.blocks[j].y;
+
+            if (goalX > (155 + ALLOWABLE_BUF) && goalDetectedRight == 0) {
+              forwardRight(TURNING_SPEED);
+              Serial.println("Goal detected to the right, turning");
+              goalDetectedRight = 1;
+            }
+            if (goalX < (155 - ALLOWABLE_BUF) && goalDetectedLeft == 0 && !goalDetectedRight) {
+              forwardLeft(TURNING_SPEED);
+              Serial.println("Goal detected to the left, turning");
+              goalDetectedLeft = 1;
+            }
+
+
+
+            if (goalX < 155 + TARGET_BUF && goalDetectedRight == 1 ) {
+              forward(FORWARD_SPEED);
+              goalDetectedRight = 0;
+              Serial.println("Goal centered");
+            }
+            if (goalX > 155 - TARGET_BUF && goalDetectedLeft == 1) {
+              forward(FORWARD_SPEED);
+              goalDetectedLeft = 0;
+              Serial.println("Goal centered");
+            }
 
           }
 
         }
-        
-        
-        if ((!quaffleSeenThisLoop || quaffleY > 175 ) && quaffleDetected) {
-          Serial.print("Ball disappeared ");
-          Serial.print(millis());
-          Serial.print(" ");
-          Serial.println(i);
-          quaffleDetectedRight = 0;
-          quaffleDetectedLeft = 0;
-          quaffleDetected = 0;
-          forward(FORWARD_SPEED);
-        }
-
 
       }
     }
+    if (loopsSinceQuaffleSeen > 10 && quaffleDetected) {
+      Serial.print("Ball disappeared ");
+      Serial.print(millis());
+      Serial.print(" ");
+      Serial.println(i);
+      quaffleDetectedRight = 0;
+      quaffleDetectedLeft = 0;
+      quaffleDetected = 0;
+      forward(FORWARD_SPEED);
+    }
+    if (goalDetected && (getIrVal(LEFT_FRONT_IR_PIN) < 7 || getIrVal(RIGHT_FRONT_IR_PIN) < 7) && scoringMode) {
+      Serial.println("at goal!");
+      excited();
+      while (1) {
+        brake();
+      }
+    }
+    if (!goalSeenThisLoop && goalDetected) {
+      Serial.print("Goal disappeared ");
+      Serial.print(millis());
+      Serial.print(" ");
+      Serial.println(i);
+      goalDetectedRight = 0;
+      goalDetectedLeft = 0;
+      goalDetected = 0;
+      forward(FORWARD_SPEED);
+    }
+
   }
   brake();
   stopRoll();
 }
 
+//----------------NAV FUNC=----------
+void lineUpWall() {
+  while (abs(getIrVal(LEFT_FRONT_IR_PIN) - getIrVal(RIGHT_FRONT_IR_PIN)) > .08) {
+    Serial.print(getIrVal(LEFT_FRONT_IR_PIN));
+    Serial.print(" ");
+    Serial.println(getIrVal(RIGHT_FRONT_IR_PIN));
+
+    while (getIrVal(LEFT_FRONT_IR_PIN) < getIrVal(RIGHT_FRONT_IR_PIN)) {
+      Serial.println("rotating left");
+      left(TURNING_SPEED);
+    }
+    delay(20);
+    while (getIrVal(RIGHT_FRONT_IR_PIN) < getIrVal(LEFT_FRONT_IR_PIN)) {
+      Serial.println("rotating right");
+      right(TURNING_SPEED);
+    }
+    delay(10);
+  }
+}
 
 //-----------------SENSOR FUNCTIONS--------------------
 float getIrVal(int pin) {
@@ -340,11 +530,14 @@ float getSonarVal(int pin) {
 float getLightVal(int pin) {
   return pow(10, analogRead(pin) * 5.0 / 1024);
 }
-float getVoltage(){
-  return analogRead(VOLT_PIN)/121.79;
+float getVoltage() {
+  return analogRead(VOLT_PIN) / 121.79;
 }
+
+
+
 /*
-int updateSensors() {
+  int updateSensors() {
   for (int i = 0; i < SENSOR_QUANT; i++) {
     //Serial.print("Update Sensors ");
     //Serial.println(analogRead(sensors[i].pin));
@@ -352,9 +545,9 @@ int updateSensors() {
     //Serial.print("updateSensors val: ");
     //Serial.println(sensors[i].value);
   }
-}
-/*
-int greenBlockDetected( blocks){
+  }
+  /*
+  int greenBlockDetected( blocks){
   int blockDetected = 0;
   for(int i=0;i<blocks;i++){
     if(blocks[i].signature == 2) blockDetected = 1;

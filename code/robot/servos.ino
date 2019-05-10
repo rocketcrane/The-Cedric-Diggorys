@@ -35,6 +35,6 @@ void initializeServos(){
   leftServo.attach(LEFT_SERVO_PIN);
   rightServo.attach(RIGHT_SERVO_PIN);
   roller.attach(ROLLER_PIN);
-  leftServo.write(40);
-  rightServo.write(15);
+  leftServo.write(LEFT_START);
+  rightServo.write(RIGHT_START);
 }

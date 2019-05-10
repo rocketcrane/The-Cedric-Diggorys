@@ -34,9 +34,8 @@ void brake(){
 //turn left until told otherwise
 void left(int speed){
   Serial.println("left");
-  brake();
-  digitalWrite(A_DIRECTION_PIN, A_FORWARD);
-  digitalWrite(B_DIRECTION_PIN, B_REVERSE);
+  digitalWrite(A_DIRECTION_PIN, A_REVERSE);
+  digitalWrite(B_DIRECTION_PIN, B_FORWARD);
   digitalWrite(A_BRAKE_PIN, LOW);
   digitalWrite(B_BRAKE_PIN, LOW);
   analogWrite(A_SPEED_PIN, speed);
@@ -44,10 +43,9 @@ void left(int speed){
 }
 
 void right(int speed){
-  brake();
   Serial.println("right");
-  digitalWrite(A_DIRECTION_PIN, A_REVERSE);
-  digitalWrite(B_DIRECTION_PIN, B_FORWARD);
+  digitalWrite(A_DIRECTION_PIN, A_FORWARD);
+  digitalWrite(B_DIRECTION_PIN, B_REVERSE);
   digitalWrite(A_BRAKE_PIN, LOW);
   digitalWrite(B_BRAKE_PIN, LOW);
   analogWrite(A_SPEED_PIN, speed);
@@ -60,8 +58,8 @@ void forwardRight(int speed){
   digitalWrite(B_DIRECTION_PIN, B_FORWARD);
   digitalWrite(A_BRAKE_PIN, LOW);
   digitalWrite(B_BRAKE_PIN, LOW);
-  analogWrite(A_SPEED_PIN, speed/2);
-  analogWrite(B_SPEED_PIN, speed);
+  analogWrite(A_SPEED_PIN, speed);
+  analogWrite(B_SPEED_PIN, speed/2);
 }
 void forwardLeft(int speed){
   Serial.println("forward right");
@@ -70,8 +68,8 @@ void forwardLeft(int speed){
   digitalWrite(B_DIRECTION_PIN, B_FORWARD);
   digitalWrite(A_BRAKE_PIN, LOW);
   digitalWrite(B_BRAKE_PIN, LOW);
-  analogWrite(A_SPEED_PIN, speed);
-  analogWrite(B_SPEED_PIN, speed/2);
+  analogWrite(A_SPEED_PIN, speed/2);
+  analogWrite(B_SPEED_PIN, speed);
 }
 void excited(){
   forward(FORWARD_SPEED);
@@ -86,14 +84,14 @@ void reverse_right(){
   reverse(REVERSE_SPEED);
     delay(750);
     right(TURNING_SPEED);
-    delay(300);
+    delay(700);
     forward(FORWARD_SPEED);
 }
 void reverse_left(){
   reverse(REVERSE_SPEED);
     delay(750);
     left(TURNING_SPEED);
-    delay(300);
+    delay(700);
     forward(FORWARD_SPEED);
 }
 void turn_left(){
@@ -104,5 +102,18 @@ void turn_left(){
 void turn_right(){
     right(TURNING_SPEED);
     delay(300);
+    forward(FORWARD_SPEED);
+}
+
+void turn_right_90(){
+    right(TURNING_SPEED);
+    delay(300);
+    forward(FORWARD_SPEED);
+}
+void turn_180 (){
+    reverse(REVERSE_SPEED);
+    delay(750);
+    left(TURNING_SPEED);
+    delay(1300);
     forward(FORWARD_SPEED);
 }
