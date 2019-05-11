@@ -53,3 +53,17 @@ float MAX(float a, float b, float c){
   if(c> currMax) currMax = c;
   return currMax;
 }
+
+bool isRed(float hue){
+  return hue < 363 && hue > 353;
+}
+bool isBlue(float hue){
+  return hue < 202 && hue > 192;
+}
+bool isYellow(float hue){
+  return hue < 87 && hue > 77;
+}
+bool isGray(float hue){
+  return hue < 165 && hue > 150;
+}
+
