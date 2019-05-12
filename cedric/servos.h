@@ -23,7 +23,7 @@ int const ROLLER_PIN = 10;
 const int RIGHT_START = 13;
 const int LEFT_START = 160 - RIGHT_START;
 const int LIFT_ANGLE = 35;
-
+const int HIGHER_LIFT_ANGLE = 55;
 //------------------------DECLARATIONS------------------------
 Servo leftServo;
 Servo rightServo;
@@ -46,11 +46,41 @@ void raiseArm() {
   }
 }
 
+// RAISEARMHIGHER
+// ------------------------------------------
+// raises arm higher to get over wall
+void raiseArmHigher() {
+  //attaches both arm servos
+  leftServo.attach(LEFT_SERVO_PIN);
+  rightServo.attach(RIGHT_SERVO_PIN);
+  for (int pos = 0; pos <= HIGHER_LIFT_ANGLE; pos++) { // goes from 0 degrees to 180 degrees
+    // in steps of 1 degree
+    rightServo.write(RIGHT_START + pos); // tell servo to go to position in variable 'pos'
+    leftServo.write(LEFT_START - pos);
+    delay(15); // waits 15ms for the servo to reach the position
+  }
+}
+
+
 // LOWERARM
 // ------------------------------------------
 // lowers arm
 void lowerArm() {
   for (int pos = LIFT_ANGLE; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
+    rightServo.write(pos + RIGHT_START); // tell servo to go to position in variable 'pos'
+    leftServo.write(LEFT_START - pos);
+    delay(15); // waits 15ms for the servo to reach the position
+  }
+  //detaches both arm servos
+  leftServo.detach();
+  rightServo.detach();
+}
+
+// LOWERARMHIGHER
+// ------------------------------------------
+// lowers arm from higher pos
+void lowerArmHigher() {
+  for (int pos = HIGHER_LIFT_ANGLE; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
     rightServo.write(pos + RIGHT_START); // tell servo to go to position in variable 'pos'
     leftServo.write(LEFT_START - pos);
     delay(15); // waits 15ms for the servo to reach the position

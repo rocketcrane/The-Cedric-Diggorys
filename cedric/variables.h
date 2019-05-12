@@ -27,6 +27,10 @@ int const RED_SIDE = 2;
 int const RED_TAPE = 3;
 int const BLUE_TAPE = 4;
 
+//DIRECTIONS
+int const RIGHT = 0;
+int const LEFT = 1;
+
 //INTEGRATOR CONSTANTS
 double const DECAY = 2;
 int const INTEGRATE = 20;
@@ -34,7 +38,7 @@ int const SENSITIVITY = 50;
 unsigned long const INTERVAL = 250;
 
 //COLLECTING TIMES
-unsigned long const COLLECTING_TIME = 20 * 1000L;
+unsigned long const COLLECTING_TIME = 0 * 1000L;
 unsigned long const QUICK_COLLECTING_TIME = 5 * 1000L;
 
 //MISC
@@ -58,6 +62,8 @@ int location;
 int currSide;
 int homeSide;
 int goalSide;
+int scoringWallSidePin;
+
 
 //goal detection variables
 int goalDetected = 0;
@@ -67,6 +73,7 @@ int goalSeenThisLoop = 0;
 int goalCentered = 0;
 int goalDetectedLeft;
 int goalDetectedRight;
+int scoringTurnDirection;
 
 //integrator variables
 double leakyIntegrator = 40;

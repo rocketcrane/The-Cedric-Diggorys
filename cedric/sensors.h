@@ -114,28 +114,28 @@ void RGBtoHSV( float r, float g, float b, float *h, float *s, float *v )
 // ------------------------------------------
 // returns #t if RGB sensor sees red
 bool isRed(float hue) {
-  return hue < 363 && hue > 353;
+  return hue < 360 && hue > 340;
 }
 
 // ISBLUE?
 // ------------------------------------------
 // returns #t if RGB sensor sees blue
 bool isBlue(float hue) {
-  return hue < 202 && hue > 192;
+  return hue < 209 && hue > 189;
 }
 
 // ISYELLOW?
 // ------------------------------------------
 // returns #t if RGB sensor sees yellow
 bool isYellow(float hue) {
-  return hue < 87 && hue > 77;
+  return hue < 100 && hue > 83;
 }
 
 // ISGRAY?
 // ------------------------------------------
 // returns #t if RGB sensor sees gray
 bool isGray(float hue) {
-  return hue < 165 && hue > 150;
+  return hue < 180 && hue > 150;
 }
 
 #endif

@@ -217,4 +217,56 @@ void randTurn(unsigned long time) {
   }
 }
 
+void reverse_right(){
+  reverse(REVERSE_SPEED);
+    delay(300);
+    right(TURNING_SPEED);
+    delay(700);
+    forward(FORWARD_SPEED);
+}
+void reverse_left(){
+  reverse(REVERSE_SPEED);
+    delay(300);
+    left(TURNING_SPEED);
+    delay(700);
+    forward(FORWARD_SPEED);
+}
+void turn_left(){
+    left(TURNING_SPEED);
+    delay(300);
+    forward(FORWARD_SPEED);
+}
+void turn_right(){
+    right(TURNING_SPEED);
+    delay(300);
+    forward(FORWARD_SPEED);
+}
+
+void turn_right_90(){
+    right(TURNING_SPEED);
+    delay(300);
+    forward(FORWARD_SPEED);
+}
+void turn_180 (){
+    reverse(REVERSE_SPEED);
+    delay(750);
+    left(TURNING_SPEED);
+    delay(1300);
+    forward(FORWARD_SPEED);
+}
+//turns right 180
+void right180() {
+  right(TURNING_SPEED);
+  delay(1000);
+  forward(FORWARD_SPEED);
+}
+void rand_turn() {
+  int x = random(0, 2);
+  if (x == 1) {
+    reverse_left();
+  } else {
+    reverse_right();
+  }
+}
+
 #endif
