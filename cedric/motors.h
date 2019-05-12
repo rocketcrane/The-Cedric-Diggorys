@@ -28,14 +28,23 @@ int const B_SPEED_PIN = 11;
 //------------------------CONSTANTS------------------------
 //MOTOR SPEEDS
 int const FULL_SPEED = 255;
-int const FORWARD_SPEED = 180;
-int const TURNING_SPEED = 180;
-int const REVERSE_SPEED = 170;
+int const FORWARD_SPEED = 240;
+int const TURNING_SPEED = 240;
+int const REVERSE_SPEED = 200;
 //FOR TURNING
-double const SPEED_DIVISOR = 1.2;
+double const SPEED_DIVISOR = 1.7;
 
 //CORRECTION FOR MOTOR DRIFT
 int const CORRECTION = 15;
+
+//MOTOR STATE CONSTANTS
+int const BRAKE     = 0;
+int const FORWARD   = 1;
+int const REVERSE   = 2;
+int const SPINLEFT  = 3;
+int const SPINRIGHT = 4;
+int const TURNLEFT  = 5;
+int const TURNRIGHT = 6;
 
 //------------------------BASIC MOTOR FUNCTIONS------------------------
 
@@ -43,9 +52,10 @@ int const CORRECTION = 15;
 // ------------------------------------------
 // stop moving
 void brake() {
-  Serial.println("Braking");
+  //Serial.println("Braking");
   digitalWrite(B_BRAKE_PIN, HIGH);
   digitalWrite(A_BRAKE_PIN, HIGH);
+  motorState = BRAKE;
   //  delay(50); //stop running code and wait for X milliseconds
 }
 
@@ -53,14 +63,15 @@ void brake() {
 // ------------------------------------------
 // move forward at SPEED
 void forward(int speed) {
-  //  Serial.print("Forward ");
-  Serial.println(speed);
+  //Serial.print("Forward ");
+  //Serial.println(speed);
   digitalWrite(B_DIRECTION_PIN, B_FORWARD);
   digitalWrite(B_BRAKE_PIN, LOW);
   analogWrite(B_SPEED_PIN, speed);
   digitalWrite(A_DIRECTION_PIN, A_FORWARD);
   digitalWrite(A_BRAKE_PIN, LOW);
   analogWrite(A_SPEED_PIN, (CORRECTION + speed));
+  motorState = FORWARD;
 }
 
 // REVERSE
@@ -75,6 +86,7 @@ void reverse(int speed) {
   digitalWrite(A_DIRECTION_PIN, A_REVERSE);
   digitalWrite(A_BRAKE_PIN, LOW);
   analogWrite(A_SPEED_PIN, CORRECTION + speed);
+  motorState = REVERSE;
 }
 
 // LEFT
@@ -88,6 +100,7 @@ void left(int speed) {
   digitalWrite(A_BRAKE_PIN, LOW);
   analogWrite(B_SPEED_PIN, speed);
   analogWrite(A_SPEED_PIN, speed);
+  motorState = SPINLEFT;
 }
 
 // RIGHT
@@ -101,6 +114,7 @@ void right(int speed) {
   digitalWrite(A_BRAKE_PIN, LOW);
   analogWrite(B_SPEED_PIN, speed);
   analogWrite(A_SPEED_PIN, speed);
+  motorState = SPINRIGHT;
 }
 
 // FORWARDRIGHT
@@ -114,6 +128,7 @@ void forwardRight(int speed) {
   digitalWrite(A_BRAKE_PIN, LOW);
   analogWrite(B_SPEED_PIN, speed);
   analogWrite(A_SPEED_PIN, speed / SPEED_DIVISOR);
+  motorState = TURNRIGHT;
 }
 
 // FORWARDLEFT
@@ -127,6 +142,7 @@ void forwardLeft(int speed) {
   digitalWrite(A_BRAKE_PIN, LOW);
   analogWrite(B_SPEED_PIN, speed / SPEED_DIVISOR);
   analogWrite(A_SPEED_PIN, speed);
+  motorState = TURNLEFT;
 }
 
 // EXCITED
@@ -149,8 +165,16 @@ void excited() {
 // then moves forward again.
 void reverseTime(unsigned long time) {
   reverse(REVERSE_SPEED);
-  delay(time);
-  forward(FORWARD_SPEED);
+  //stops roller (if on) while reversing
+  if (rollerState == IN) {
+    stopRoll();
+    delay(time);
+    forward(FORWARD_SPEED);
+    rollIn();
+  } else {
+    delay(time);
+    forward(FORWARD_SPEED);
+  }
 }
 
 // SPINLEFTTIME
@@ -205,7 +229,7 @@ void randSpin(unsigned long time) {
   }
 }
 
-// RANDSPIN
+// RANDTURN
 // ------------------------------------------
 // Deterministic: moves randomly forward right or forward left for TIME
 void randTurn(unsigned long time) {
@@ -217,55 +241,51 @@ void randTurn(unsigned long time) {
   }
 }
 
-void reverse_right(){
-  reverse(REVERSE_SPEED);
-    delay(300);
-    right(TURNING_SPEED);
-    delay(700);
-    forward(FORWARD_SPEED);
-}
-void reverse_left(){
-  reverse(REVERSE_SPEED);
-    delay(300);
-    left(TURNING_SPEED);
-    delay(700);
-    forward(FORWARD_SPEED);
-}
-void turn_left(){
-    left(TURNING_SPEED);
-    delay(300);
-    forward(FORWARD_SPEED);
-}
-void turn_right(){
-    right(TURNING_SPEED);
-    delay(300);
-    forward(FORWARD_SPEED);
+//------------------------NAVIGATION FUNCTIONS------------------------
+
+// SLOWLINEUPWALL
+// ------------------------------------------
+void slowLineUpWall() {
+
+  while (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN)) > .1) {
+    Serial.print(getIRVal(LEFT_FRONT_IR_PIN));
+    Serial.print(" ");
+    Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
+
+    while (getIRVal(LEFT_FRONT_IR_PIN) < getIRVal(RIGHT_FRONT_IR_PIN)) {
+      Serial.println("rotating left");
+      left(TURNING_SPEED);
+      delay(30);
+      brake();
+    }
+
+    while (getIRVal(RIGHT_FRONT_IR_PIN) < getIRVal(LEFT_FRONT_IR_PIN)) {
+      Serial.println("rotating right");
+      right(TURNING_SPEED);
+      delay(30);
+      brake();
+    }
+  }
 }
 
-void turn_right_90(){
-    right(TURNING_SPEED);
-    delay(300);
-    forward(FORWARD_SPEED);
-}
-void turn_180 (){
-    reverse(REVERSE_SPEED);
-    delay(750);
-    left(TURNING_SPEED);
-    delay(1300);
-    forward(FORWARD_SPEED);
-}
-//turns right 180
-void right180() {
-  right(TURNING_SPEED);
-  delay(1000);
-  forward(FORWARD_SPEED);
-}
-void rand_turn() {
-  int x = random(0, 2);
-  if (x == 1) {
-    reverse_left();
-  } else {
-    reverse_right();
+// LINEUPWALL
+// ------------------------------------------
+void lineUpWall() {
+
+  while (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN)) > .1) {
+    Serial.print(getIRVal(LEFT_FRONT_IR_PIN));
+    Serial.print(" ");
+    Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
+
+    while (getIRVal(LEFT_FRONT_IR_PIN) < getIRVal(RIGHT_FRONT_IR_PIN)) {
+      Serial.println("rotating left");
+      left(TURNING_SPEED);
+    }
+
+    while (getIRVal(RIGHT_FRONT_IR_PIN) < getIRVal(LEFT_FRONT_IR_PIN)) {
+      Serial.println("rotating right");
+      right(TURNING_SPEED);
+    }
   }
 }
 

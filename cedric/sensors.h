@@ -9,6 +9,7 @@
 #include <SPI.h>
 #include <Pixy.h>
 #include <Adafruit_TCS34725.h>
+#include "servos.h"
 #include "variables.h"
 
 //------------------------PINS------------------------
@@ -114,28 +115,58 @@ void RGBtoHSV( float r, float g, float b, float *h, float *s, float *v )
 // ------------------------------------------
 // returns #t if RGB sensor sees red
 bool isRed(float hue) {
-  return hue < 360 && hue > 340;
+  return hue < 363 && hue > 353;
 }
 
 // ISBLUE?
 // ------------------------------------------
 // returns #t if RGB sensor sees blue
 bool isBlue(float hue) {
-  return hue < 209 && hue > 189;
+  return hue < 202 && hue > 192;
 }
 
 // ISYELLOW?
 // ------------------------------------------
 // returns #t if RGB sensor sees yellow
 bool isYellow(float hue) {
-  return hue < 100 && hue > 83;
+  return hue < 87 && hue > 77;
 }
 
 // ISGRAY?
 // ------------------------------------------
 // returns #t if RGB sensor sees gray
 bool isGray(float hue) {
-  return hue < 180 && hue > 150;
+  return hue < 165 && hue > 150;
+}
+
+// GETIRVAL
+// ------------------------------------------
+// returns IR value of sensor at PIN
+float getIRVal(int pin) {
+  //return sensor.value * sensor.modifier;
+  // return 37-sensor.value;
+  return 13 * pow(analogRead(pin) * 0.0048828125, -1);
+}
+
+// GETSONARVAL
+// ------------------------------------------
+// returns sonar value of sensor at PIN
+float getSonarVal(int pin) {
+  return analogRead(pin) / 5;
+}
+
+// GETLIGHTVAL
+// ------------------------------------------
+// returns light value of sensor at PIN
+float getLightVal(int pin) {
+  return pow(10, analogRead(pin) * 5.0 / 1024);
+}
+
+// GETVOLTAGE
+// ------------------------------------------
+// returns analog value of battery at PIN
+float getVoltage() {
+  return analogRead(VOLT_PIN);
 }
 
 #endif

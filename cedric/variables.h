@@ -35,14 +35,15 @@ int const LEFT = 1;
 double const DECAY = 2;
 int const INTEGRATE = 20;
 int const SENSITIVITY = 50;
+int const RESET = 35;
 unsigned long const INTERVAL = 250;
 
 //COLLECTING TIMES
-unsigned long const COLLECTING_TIME = 0 * 1000L;
+unsigned long const COLLECTING_TIME = 20 * 1000L;
 unsigned long const QUICK_COLLECTING_TIME = 5 * 1000L;
 
 //MISC
-int const LOW_BATTERY_LEVEL = 925;
+int const LOW_BATTERY_LEVEL = 910;
 unsigned long const END_TIME = 60 * 1000L;
 
 //------------------------VARIABLES------------------------
@@ -55,7 +56,7 @@ int quaffleX;
 int quaffleY;
 int loopsSinceQuaffleSeen = 1000;
 int turnCounter = 0;
-int state = COLLECTING;
+int state;
 
 //location variables
 int location;
@@ -63,7 +64,6 @@ int currSide;
 int homeSide;
 int goalSide;
 int scoringWallSidePin;
-
 
 //goal detection variables
 int goalDetected = 0;
@@ -81,5 +81,13 @@ unsigned long previousMillis = 0;
 
 //scoring variables
 unsigned long scoreTime = COLLECTING_TIME;
+
+//color sensor variables
+uint16_t red, green, blue, clear;
+float leftHue, rightHue, s, v;
+
+//motor state variables
+int motorState;
+int rollerState;
 
 #endif
