@@ -12,7 +12,15 @@
 #include "servos.h"
 #include "variables.h"
 
-int const STARTINGSIDE = BLUE_SIDE; //CHOOSE STARTING SIDE
+//CHOOSE STARTING SIDE
+//int const STARTINGSIDE = BLUE_SIDE;
+int const STARTINGSIDE = RED_SIDE;
+unsigned long const END_TIME = 120 * 1000L; //RUNTIME FOR ROBOT
+//COLLECTING TIMES
+unsigned long const COLLECTING_TIME = 30 * 1000L;
+unsigned long const QUICK_COLLECTING_TIME = 10 * 1000L;
+//scoring variables
+unsigned long scoreTime = COLLECTING_TIME;
 
 void setup() {
   //WAIT FOR X SECONDS
@@ -48,6 +56,7 @@ void setup() {
   //START RGB SENSORS AND PIXY
   leftRGB.begin();
   rightRGB.begin();
+  rearRGB.begin();
   pixy.init();
 
   //RESET VARIABLES
@@ -79,7 +88,7 @@ void setup() {
   }
 
   //START MOVING
-  forward(FORWARD_SPEED);
+  if (state == COLLECTING) forward(FORWARD_SPEED);
   rollIn();
 }
 
@@ -91,7 +100,6 @@ void loop() {
     unsigned long currentMillis = millis();
     //grab pixy blocks
     uint16_t blocks;
-    char buf[32];
     blocks = pixy.getBlocks();
     //generic loop counter for Pixy
     int j;
@@ -101,7 +109,8 @@ void loop() {
     RGBtoHSV(red, green, blue, &leftHue, &s, &v);
     rightRGB.getRawData(&red, &green, &blue, &clear);
     RGBtoHSV(red, green, blue, &rightHue, &s, &v);
-
+    rearRGB.getRawData(&red, &green, &blue, &clear);
+    RGBtoHSV(red, green, blue, &rearHue, &s, &v);
     //CHECK BATTERY LEVEL
     if (getVoltage() < LOW_BATTERY_LEVEL) {
       Serial.println("I'LL BE BACK");
@@ -109,10 +118,7 @@ void loop() {
 
     //SWITCH TO SCORING MODE IF TIME HAS PAST
     if (currentMillis >= scoreTime && isRed(rightHue) && state == COLLECTING) {
-      if (currSide == RED_SIDE) {
-        reverse(REVERSE_SPEED);
-        delay(300);
-      }
+      lastColorSeen = RED_TAPE;
       brake();
       state = FOLLOW_LINE;
       raiseArmHigher();
@@ -262,6 +268,13 @@ void loop() {
             quaffleY = pixy.blocks[j].y;
             Serial.println("quaffle DETECTED");
           }
+          if (pixy.blocks[j].signature == YELLOW_SIG && (pixy.blocks[j].height * pixy.blocks[j].width) > 300) {
+            //update variables
+            loopsSinceGoalSeen = 0;
+            goalSeenThisLoop = 1;
+            goalDetected = 1;
+            Serial.println("goal DETECTED");
+          }
         }
 
         //TRY TO FOLLOW A GREEN BALL IF IT EXISTS
@@ -295,6 +308,10 @@ void loop() {
       if (!quaffleSeenThisLoop) {
         loopsSinceQuaffleSeen ++;
       }
+      //if no goal has been seen this loop, increment counter
+      if (!goalSeenThisLoop) {
+        loopsSinceGoalSeen ++;
+      }
 
       //if quaffle hasn't been seen in X loops, update variables
       if (loopsSinceQuaffleSeen > 10 && quaffleDetected) {
@@ -304,105 +321,128 @@ void loop() {
         quaffleDetectedLeft = 0;
         quaffleDetected = 0;
       }
+      //if goal dissapears
+      if (loopsSinceGoalSeen > 10 && goalDetected) {
+        Serial.print("goal DISAPPEARED");
+        //update variables
+        quaffleDetected = 0;
+      }
     }
 
     //------------------------FOLLOW LINE STATE------------------------
     if (state == FOLLOW_LINE) {
-      Serial.println("following line");
-      Serial.println(rightHue);
-      // Serial.println(rightHue);
+
+      Serial.println("FOLLOWING line");
+      //Serial.println(rightHue);
       if (isRed(rightHue)) {
         Serial.println("red");
-        forward(FORWARD_SPEED);
+        forward(LINE_SPEED);
+        lastColorSeen = RED_TAPE;
       }
-      if (isBlue(rightHue)) {
+
+      if (isBlue(rightHue) || lastColorSeen == BLUE_TAPE) {
         Serial.println("blue");
-        if (homeSide == BLUE_SIDE) left(TURNING_SPEED);
-        else right(TURNING_SPEED);
+        if (homeSide == BLUE_SIDE) left(LINE_SPEED);
+        else right(LINE_SPEED);
+        lastColorSeen = BLUE_TAPE;
       }
-      if (isGray(rightHue)) {
+
+      if (isGray(rightHue) && lastColorSeen == RED_TAPE) {
         Serial.println("gray");
-        if (homeSide == BLUE_SIDE) right(TURNING_SPEED);
-        else left(TURNING_SPEED);
+        if (homeSide == BLUE_SIDE) right(LINE_SPEED);
+        else left(LINE_SPEED);
       }
+
       if (isYellow(rightHue)) {
         brake();
-        Serial.println("Wall detected");
+        Serial.println("wall detected");
         state = SCORING;
+        
+        while (!(isGray(rightHue))) {
+          rightRGB.getRawData(&red, &green, &blue, &clear);
+          RGBtoHSV(red, green, blue, &rightHue, &s, &v);
+          forward(LINE_SPEED);
+        }
         brake();
-        Serial.print(getIRVal(LEFT_FRONT_IR_PIN));
-        Serial.print(" ");
-        Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
-        Serial.println(abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN)));
-        //lineUpWall();
-        Serial.print(getIRVal(LEFT_FRONT_IR_PIN));
-        Serial.print(" ");
-        Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
-        //turn right until nothing in front
-        float sonarVal = getSonarVal(SONAR_PIN);
-        Serial.println(sonarVal);
-        while (sonarVal < 15) {
-          if (scoringTurnDirection == RIGHT) right(TURNING_SPEED);
-          else left(TURNING_SPEED);
-          sonarVal = getSonarVal(SONAR_PIN);
-          Serial.println(sonarVal);
-        }
-        Serial.println("done sonar turn");
-        while (!isYellow(rightHue)) {
+        
+        while (!(isYellow(rightHue))) {
+          //Serial.println(rightHue);
           rightRGB.getRawData(&red, &green, &blue, &clear);
           RGBtoHSV(red, green, blue, &rightHue, &s, &v);
-          if (scoringTurnDirection == RIGHT) right(TURNING_SPEED);
-          else left(TURNING_SPEED);
+          
+          if (scoringTurnDirection == RIGHT) {
+            right(LINE_SPEED);
+          } else {
+            left(LINE_SPEED);
+          }
         }
+        brake();
         Serial.println("done no yellow turn");
+        
         while (isYellow(rightHue)) {
-          Serial.println(rightHue);
+          //Serial.println(rightHue);
           rightRGB.getRawData(&red, &green, &blue, &clear);
           RGBtoHSV(red, green, blue, &rightHue, &s, &v);
-          if (scoringTurnDirection == RIGHT) right(TURNING_SPEED);
-          else left(TURNING_SPEED);
+          
+          if (scoringTurnDirection == RIGHT) {
+            right(LINE_SPEED);
+          }
+          else {
+            left(LINE_SPEED);
+          }
         }
         Serial.println("done yellow turn");
         brake();
+        
+        while (isYellow(rearHue)) {
+          rearRGB.getRawData(&red, &green, &blue, &clear);
+          RGBtoHSV(red, green, blue, &rearHue, &s, &v);
+          
+          if (scoringTurnDirection == RIGHT) {
+            left(LINE_SPEED);
+          }
+          else {
+            right(LINE_SPEED);
+          }
+        }
         lowerArmHigher();
       }
     }
 
     //------------------------SCORING STATE------------------------
     if (state == SCORING) {
+      
       float wallDist = getIRVal(scoringWallSidePin);
-      Serial.println(wallDist);
+      //Serial.println(wallDist);
+      
       if (wallDist < 8 || isYellow(rightHue)) {
         Serial.println("too close to wall");
-        if (scoringTurnDirection == RIGHT) forwardRight(FORWARD_SPEED);
-        else forwardLeft(FORWARD_SPEED);
+        
+        if (scoringTurnDirection == RIGHT) right(SCORING_SPEED);
+        else left(SCORING_SPEED);
       }
 
       else {
-        if (wallDist > 9) {
-          if (scoringTurnDirection == RIGHT) forwardLeft(FORWARD_SPEED);
-          else forwardRight(FORWARD_SPEED);
-        }
-        else {
-          forward(FORWARD_SPEED);
-        }
+        if (scoringTurnDirection == RIGHT) forwardLeft(SCORING_SPEED);
+        else forwardRight(SCORING_SPEED);
       }
-      if (getIRVal(LEFT_FRONT_IR_PIN) < 7 ) {
+      
+      if (getIRVal(LEFT_FRONT_IR_PIN) < 8 && goalDetected) {
         Serial.println("found goal");
-        Serial.println(wallDist);
-        Serial.println(getIRVal(LEFT_FRONT_IR_PIN));
-        Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
+        //Serial.println(wallDist);
+        //Serial.println(getIRVal(LEFT_FRONT_IR_PIN));
+        //Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
         state = COLLECTING;
         scoreTime = currentMillis + COLLECTING_TIME;
         slowLineUpWall();
         delay(1000);
         raiseArm();
-        forward(FORWARD_SPEED);
+        forward(SCORING_SPEED);
         delay(400);
         brake();
         rollOut();
         delay(2000);
-        reverse(FORWARD_SPEED);
+        reverse(SCORING_SPEED);
         delay(500);
         brake();
         lowerArm();
@@ -410,7 +450,8 @@ void loop() {
       }
     }
   }
-  
+
+
   //STOP ROBOT
   brake();
   stopRoll();

@@ -37,6 +37,35 @@ Servo roller;
 
 //------------------------SERVO FUNCTIONS------------------------
 
+// ROLLIN
+// ------------------------------------------
+// starts roller to collect balls
+void rollIn() {
+  roller.attach(ROLLER_PIN);
+  roller.write(0);
+  //update roller state
+  rollerState = IN;
+}
+
+// ROLLOUT
+// ------------------------------------------
+// starts roller to score
+void rollOut() {
+  roller.attach(ROLLER_PIN);
+  roller.write(180);
+  //update roller state
+  rollerState = OUT;
+}
+
+// STOPROLL
+// ------------------------------------------
+// stops and detaches roller servo
+void stopRoll() {
+  roller.detach();
+  //update roller state
+  rollerState = STOP;
+}
+
 // RAISEARM
 // ------------------------------------------
 // raises arm
@@ -73,11 +102,16 @@ void raiseArmHigher() {
   //attaches both arm servos
   leftServo.attach(LEFT_SERVO_PIN);
   rightServo.attach(RIGHT_SERVO_PIN);
+
   for (int pos = 0; pos <= HIGHER_LIFT_ANGLE; pos++) { // goes from 0 degrees to 180 degrees
     // in steps of 1 degree
     rightServo.write(RIGHT_START + pos); // tell servo to go to position in variable 'pos'
     leftServo.write(LEFT_START - pos);
     delay(15); // waits 15ms for the servo to reach the position
+  }
+
+  if (rollerState == IN) {
+    stopRoll();
   }
 }
 
@@ -85,6 +119,7 @@ void raiseArmHigher() {
 // ------------------------------------------
 // lowers arm from higher pos
 void lowerArmHigher() {
+
   for (int pos = HIGHER_LIFT_ANGLE; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
     rightServo.write(pos + RIGHT_START); // tell servo to go to position in variable 'pos'
     leftServo.write(LEFT_START - pos);
@@ -93,35 +128,10 @@ void lowerArmHigher() {
   //detaches both arm servos
   leftServo.detach();
   rightServo.detach();
-}
 
-// ROLLIN
-// ------------------------------------------
-// starts roller to collect balls
-void rollIn() {
-  roller.attach(ROLLER_PIN);
-  roller.write(0);
-  //update roller state
-  rollerState = IN;
-}
-
-// ROLLOUT
-// ------------------------------------------
-// starts roller to score
-void rollOut() {
-  roller.attach(ROLLER_PIN);
-  roller.write(180);
-  //update roller state
-  rollerState = OUT;
-}
-
-// STOPROLL
-// ------------------------------------------
-// stops and detaches roller servo
-void stopRoll() {
-  roller.detach();
-  //update roller state
-  rollerState = STOP;
+  if (rollerState == STOP) {
+    rollIn();
+  }
 }
 
 #endif

@@ -129,14 +129,14 @@ bool isBlue(float hue) {
 // ------------------------------------------
 // returns #t if RGB sensor sees yellow
 bool isYellow(float hue) {
-  return hue < 87 && hue > 77;
+  return hue < 95 && hue > 77;
 }
 
 // ISGRAY?
 // ------------------------------------------
 // returns #t if RGB sensor sees gray
 bool isGray(float hue) {
-  return hue < 165 && hue > 150;
+  return !isYellow(hue) && !isRed(hue) && !isBlue(hue);
 }
 
 // GETIRVAL

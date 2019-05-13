@@ -28,14 +28,17 @@ int const B_SPEED_PIN = 11;
 //------------------------CONSTANTS------------------------
 //MOTOR SPEEDS
 int const FULL_SPEED = 255;
-int const FORWARD_SPEED = 240;
-int const TURNING_SPEED = 240;
+int const FORWARD_SPEED = 200;
+int const TURNING_SPEED = 200;
 int const REVERSE_SPEED = 200;
 //FOR TURNING
-double const SPEED_DIVISOR = 1.7;
+double const SPEED_DIVISOR = 1.9;
+//MOTOR SPEEDS FOR FOLLOW LINE AND SCORING
+int const LINE_SPEED = 160;
+int const SCORING_SPEED = 180;
 
 //CORRECTION FOR MOTOR DRIFT
-int const CORRECTION = 15;
+int const CORRECTION = -20;
 
 //MOTOR STATE CONSTANTS
 int const BRAKE     = 0;
@@ -265,6 +268,11 @@ void slowLineUpWall() {
       delay(30);
       brake();
     }
+  }
+
+  //double check if robot has lined up with wall correctly
+  if (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN)) > .1) {
+    slowLineUpWall();
   }
 }
 
