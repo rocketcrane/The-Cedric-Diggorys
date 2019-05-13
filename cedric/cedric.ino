@@ -15,11 +15,11 @@
 //CHOOSE STARTING SIDE
 //int const STARTINGSIDE = BLUE_SIDE;
 int const STARTINGSIDE = RED_SIDE;
-unsigned long const END_TIME = 30 * 1000L; //RUNTIME FOR ROBOT
+unsigned long const END_TIME = 320 * 1000L; //RUNTIME FOR ROBOT
 //COLLECTING TIMES
-unsigned long const COLLECTING_TIME = 0 * 1000L;
+unsigned long const COLLECTING_TIME = 30 * 1000L;
 unsigned long const QUICK_COLLECTING_TIME = 5 * 1000L;
-long const GOAL_SIZE = 38000; //GOAL SIZE
+long const GOAL_SIZE = 25000; //GOAL SIZE
 //scoring variables
 unsigned long scoreTime = COLLECTING_TIME;
 
@@ -460,6 +460,7 @@ void loop() {
         //Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
         state = COLLECTING;
         scoreTime = currentMillis + COLLECTING_TIME;
+        turnLeftTime(300);
         slowLineUpWall();
         delay(1000);
         raiseArm();
