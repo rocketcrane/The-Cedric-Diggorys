@@ -35,7 +35,7 @@ int const REVERSE_SPEED = 200;
 double const SPEED_DIVISOR = 1.9;
 //MOTOR SPEEDS FOR FOLLOW LINE AND SCORING
 int const LINE_SPEED = 160;
-int const SCORING_SPEED = 180;
+int const SCORING_SPEED = 160;
 
 //CORRECTION FOR MOTOR DRIFT
 int const CORRECTION = -20;
@@ -249,31 +249,34 @@ void randTurn(unsigned long time) {
 // SLOWLINEUPWALL
 // ------------------------------------------
 void slowLineUpWall() {
-
-  while (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN)) > .1) {
+  double correction = -0.2;
+  
+  while (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN) + correction) > 0.1) {
     Serial.print(getIRVal(LEFT_FRONT_IR_PIN));
     Serial.print(" ");
     Serial.println(getIRVal(RIGHT_FRONT_IR_PIN));
 
-    while (getIRVal(LEFT_FRONT_IR_PIN) < getIRVal(RIGHT_FRONT_IR_PIN)) {
+    if (getIRVal(LEFT_FRONT_IR_PIN) < getIRVal(RIGHT_FRONT_IR_PIN) + correction) {
       Serial.println("rotating left");
-      left(TURNING_SPEED);
-      delay(30);
+      left(SCORING_SPEED);
+      delay(25);
       brake();
+      delay(10);
     }
 
-    while (getIRVal(RIGHT_FRONT_IR_PIN) < getIRVal(LEFT_FRONT_IR_PIN)) {
+    if (getIRVal(RIGHT_FRONT_IR_PIN) + correction < getIRVal(LEFT_FRONT_IR_PIN)) {
       Serial.println("rotating right");
-      right(TURNING_SPEED);
-      delay(30);
+      right(SCORING_SPEED);
+      delay(25);
       brake();
+      delay(10);
     }
   }
 
-  //double check if robot has lined up with wall correctly
-  if (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN)) > .1) {
-    slowLineUpWall();
-  }
+//  //double check if robot has lined up with wall correctly
+//  if (abs(getIRVal(LEFT_FRONT_IR_PIN) - getIRVal(RIGHT_FRONT_IR_PIN) + correction) > 0.2) {
+//    slowLineUpWall();
+//  }
 }
 
 // LINEUPWALL
@@ -287,12 +290,12 @@ void lineUpWall() {
 
     while (getIRVal(LEFT_FRONT_IR_PIN) < getIRVal(RIGHT_FRONT_IR_PIN)) {
       Serial.println("rotating left");
-      left(TURNING_SPEED);
+      left(SCORING_SPEED);
     }
 
     while (getIRVal(RIGHT_FRONT_IR_PIN) < getIRVal(LEFT_FRONT_IR_PIN)) {
       Serial.println("rotating right");
-      right(TURNING_SPEED);
+      right(SCORING_SPEED);
     }
   }
 }

@@ -15,10 +15,11 @@
 //CHOOSE STARTING SIDE
 //int const STARTINGSIDE = BLUE_SIDE;
 int const STARTINGSIDE = RED_SIDE;
-unsigned long const END_TIME = 120 * 1000L; //RUNTIME FOR ROBOT
+unsigned long const END_TIME = 30 * 1000L; //RUNTIME FOR ROBOT
 //COLLECTING TIMES
-unsigned long const COLLECTING_TIME = 30 * 1000L;
-unsigned long const QUICK_COLLECTING_TIME = 10 * 1000L;
+unsigned long const COLLECTING_TIME = 0 * 1000L;
+unsigned long const QUICK_COLLECTING_TIME = 5 * 1000L;
+long const GOAL_SIZE = 38000; //GOAL SIZE
 //scoring variables
 unsigned long scoreTime = COLLECTING_TIME;
 
@@ -88,13 +89,14 @@ void setup() {
   }
 
   //START MOVING
+  startTime = millis();
   if (state == COLLECTING) forward(FORWARD_SPEED);
   rollIn();
 }
 
 void loop() {
   //------------------------MAIN ROBOT CODE------------------------
-  while (millis() < END_TIME) {
+  while (millis() < END_TIME + startTime) {
 
     //UPDATE VARIABLES AND GRAB SENSOR DATA
     unsigned long currentMillis = millis();
@@ -121,6 +123,7 @@ void loop() {
       lastColorSeen = RED_TAPE;
       brake();
       state = FOLLOW_LINE;
+      beginLineTime = millis();
       raiseArmHigher();
       Serial.println("found line");
     }
@@ -268,13 +271,6 @@ void loop() {
             quaffleY = pixy.blocks[j].y;
             Serial.println("quaffle DETECTED");
           }
-          if (pixy.blocks[j].signature == YELLOW_SIG && (pixy.blocks[j].height * pixy.blocks[j].width) > 300) {
-            //update variables
-            loopsSinceGoalSeen = 0;
-            goalSeenThisLoop = 1;
-            goalDetected = 1;
-            Serial.println("goal DETECTED");
-          }
         }
 
         //TRY TO FOLLOW A GREEN BALL IF IT EXISTS
@@ -308,10 +304,6 @@ void loop() {
       if (!quaffleSeenThisLoop) {
         loopsSinceQuaffleSeen ++;
       }
-      //if no goal has been seen this loop, increment counter
-      if (!goalSeenThisLoop) {
-        loopsSinceGoalSeen ++;
-      }
 
       //if quaffle hasn't been seen in X loops, update variables
       if (loopsSinceQuaffleSeen > 10 && quaffleDetected) {
@@ -321,16 +313,16 @@ void loop() {
         quaffleDetectedLeft = 0;
         quaffleDetected = 0;
       }
-      //if goal dissapears
-      if (loopsSinceGoalSeen > 10 && goalDetected) {
-        Serial.print("goal DISAPPEARED");
-        //update variables
-        quaffleDetected = 0;
-      }
     }
 
     //------------------------FOLLOW LINE STATE------------------------
     if (state == FOLLOW_LINE) {
+
+      //CHANGE STATE IF TIME ELAPSED
+      if (millis() > (beginLineTime + LINEINTERVAL)) {
+        state = COLLECTING;
+        scoreTime = millis() + QUICK_COLLECTING_TIME;
+      }
 
       Serial.println("FOLLOWING line");
       //Serial.println(rightHue);
@@ -356,20 +348,21 @@ void loop() {
       if (isYellow(rightHue)) {
         brake();
         Serial.println("wall detected");
+        beginScoreTime = millis();
         state = SCORING;
-        
-        while (!(isGray(rightHue))) {
+
+        while (!(isGray(rightHue)) && millis() < (beginScoreTime + SCOREINTERVAL)) {
           rightRGB.getRawData(&red, &green, &blue, &clear);
           RGBtoHSV(red, green, blue, &rightHue, &s, &v);
           forward(LINE_SPEED);
         }
         brake();
-        
-        while (!(isYellow(rightHue))) {
+
+        while (!(isYellow(rightHue)) && millis() < (beginScoreTime + SCOREINTERVAL)) {
           //Serial.println(rightHue);
           rightRGB.getRawData(&red, &green, &blue, &clear);
           RGBtoHSV(red, green, blue, &rightHue, &s, &v);
-          
+
           if (scoringTurnDirection == RIGHT) {
             right(LINE_SPEED);
           } else {
@@ -378,12 +371,12 @@ void loop() {
         }
         brake();
         Serial.println("done no yellow turn");
-        
-        while (isYellow(rightHue)) {
+
+        while (isYellow(rightHue) && millis() < (beginScoreTime + SCOREINTERVAL)) {
           //Serial.println(rightHue);
           rightRGB.getRawData(&red, &green, &blue, &clear);
           RGBtoHSV(red, green, blue, &rightHue, &s, &v);
-          
+
           if (scoringTurnDirection == RIGHT) {
             right(LINE_SPEED);
           }
@@ -393,11 +386,11 @@ void loop() {
         }
         Serial.println("done yellow turn");
         brake();
-        
-        while (isYellow(rearHue)) {
+
+        while (isYellow(rearHue) && millis() < (beginScoreTime + SCOREINTERVAL)) {
           rearRGB.getRawData(&red, &green, &blue, &clear);
           RGBtoHSV(red, green, blue, &rearHue, &s, &v);
-          
+
           if (scoringTurnDirection == RIGHT) {
             left(LINE_SPEED);
           }
@@ -411,13 +404,46 @@ void loop() {
 
     //------------------------SCORING STATE------------------------
     if (state == SCORING) {
-      
+
+      //CHANGE STATE IF TIME ELAPSED
+      if (millis() > (beginScoreTime + SCOREINTERVAL)) {
+        state = COLLECTING;
+        scoreTime = millis() + QUICK_COLLECTING_TIME;
+      }
+
+      //IF PIXYCAM SEES A GOAL, UPDATE VARIABLES
+      if (blocks) {
+
+        //for each block, check signature
+        for (j = 0; j < blocks; j++) {
+          if (pixy.blocks[j].signature == YELLOW_SIG && (pixy.blocks[j].height * pixy.blocks[j].width) > GOAL_SIZE) {
+            //update variables
+            loopsSinceGoalSeen = 0;
+            goalSeenThisLoop = 1;
+            goalDetected = 1;
+            Serial.println("goal DETECTED");
+          }
+        }
+      }
+
+      //if no goal has been seen this loop, increment counter
+      if (!goalSeenThisLoop) {
+        loopsSinceGoalSeen ++;
+      }
+
+      //if goal dissapears
+      if (loopsSinceGoalSeen > 10 && goalDetected) {
+        Serial.print("goal DISAPPEARED");
+        //update variables
+        goalDetected = 0;
+      }
+
       float wallDist = getIRVal(scoringWallSidePin);
       //Serial.println(wallDist);
-      
+
       if (wallDist < 8 || isYellow(rightHue)) {
         Serial.println("too close to wall");
-        
+
         if (scoringTurnDirection == RIGHT) right(SCORING_SPEED);
         else left(SCORING_SPEED);
       }
@@ -426,8 +452,8 @@ void loop() {
         if (scoringTurnDirection == RIGHT) forwardLeft(SCORING_SPEED);
         else forwardRight(SCORING_SPEED);
       }
-      
-      if (getIRVal(LEFT_FRONT_IR_PIN) < 8 && goalDetected) {
+
+      if ((getIRVal(LEFT_FRONT_IR_PIN) < 8 || getIRVal(RIGHT_FRONT_IR_PIN) < 8) && goalDetected) {
         Serial.println("found goal");
         //Serial.println(wallDist);
         //Serial.println(getIRVal(LEFT_FRONT_IR_PIN));
@@ -438,7 +464,7 @@ void loop() {
         delay(1000);
         raiseArm();
         forward(SCORING_SPEED);
-        delay(400);
+        delay(600);
         brake();
         rollOut();
         delay(2000);
@@ -447,6 +473,7 @@ void loop() {
         brake();
         lowerArm();
         rollIn();
+        turnLeftTime(400);
       }
     }
   }

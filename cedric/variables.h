@@ -84,4 +84,14 @@ float leftHue, rightHue, rearHue, s, v;
 int motorState;
 int rollerState;
 
+//time variables/CONSTANTS
+//follow-line
+unsigned long const LINEINTERVAL = 10 * 1000L;
+unsigned long beginLineTime;
+//scoring
+unsigned long const SCOREINTERVAL = 20 * 1000L;
+unsigned long beginScoreTime;
+//starting time
+unsigned long startTime;
+
 #endif

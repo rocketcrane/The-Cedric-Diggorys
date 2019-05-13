@@ -79,6 +79,10 @@ void raiseArm() {
     leftServo.write(LEFT_START - pos);
     delay(15); // waits 15ms for the servo to reach the position
   }
+
+  if (rollerState == IN) {
+    stopRoll();
+  }
 }
 
 // LOWERARM
@@ -93,6 +97,10 @@ void lowerArm() {
   //detaches both arm servos
   leftServo.detach();
   rightServo.detach();
+
+  if (rollerState == STOP) {
+    rollIn();
+  }
 }
 
 // RAISEARMHIGHER

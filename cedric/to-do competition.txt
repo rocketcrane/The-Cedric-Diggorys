@@ -1,0 +1,26 @@
+1. Calibrate PIXY
+2. Ask about starting position
+3. Calibrate RGB sensors
+4. Calibrate light sensors (if necessary)
+5. Check PIXY goal size
+6. Recalibrate PIXY
+7. Get more batteries
+8. Charge batteries
+9. Test Run!
+10. Tighten wheels
+
+BEFORE GOING TO VILLARD ROOM:
+
+1. Bring batteries
+2. Bring robot
+3. Bring Allen wrench for wheels
+4. Bring cables (Arduino + PIXY)
+5. Bring extra motors
+6. Bring screwdriver + Dremel tool (screwdriver heads)
+7. Bring battery charger(s)
+8. Bring hot glue gun
+9. Bring spare parts (wheel)
+10. Bring stuff in boxes
+11. Bring LIDAR and show it off
+12. Bring vacuum
+13. Bring yarn
